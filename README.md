@@ -4,13 +4,13 @@
 Sonos, IKEA Symfonisk and Chromecast speakers. No cloud, no accounts.
 
 ```sh
-brew tap itsmesaskovic/draai
-brew install draai
+brew install itsmesaskovic/draai/draai
 brew services start draai     # runs in the background, starts at login
 open http://localhost:8765
 ```
 
-Or in one line: `brew install itsmesaskovic/draai/draai`.
+The full name matters: Homebrew only trusts a third-party formula when you
+install it by its full name. After that, the short `draai` works.
 
 Update with `brew upgrade draai`. Run `brew autoupdate start` once if you
 want Homebrew to keep it current on its own.
