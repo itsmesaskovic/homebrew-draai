@@ -4,10 +4,13 @@
 Sonos, IKEA Symfonisk and Chromecast speakers. No cloud, no accounts.
 
 ```sh
-brew install itsmesaskovic/draai/draai
+brew tap itsmesaskovic/draai
+brew install draai
 brew services start draai     # runs in the background, starts at login
 open http://localhost:8765
 ```
+
+Or in one line: `brew install itsmesaskovic/draai/draai`.
 
 Update with `brew upgrade draai`. Run `brew autoupdate start` once if you
 want Homebrew to keep it current on its own.
