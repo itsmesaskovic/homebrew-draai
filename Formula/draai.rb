@@ -27,8 +27,10 @@ class Draai < Formula
     <<~EOS
       Run DRAAI in the background and at every login:
         brew services start draai
-      Then open the control panel:
-        http://localhost:8765
+      Then open it:
+        draai
+      In Chrome, choose Cast, save and share > Install page as app
+      (Safari: File > Add to Dock) to keep DRAAI in your Dock.
 
       Update with:
         brew upgrade draai
