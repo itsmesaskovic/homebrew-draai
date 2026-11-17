@@ -13,7 +13,7 @@ class Draai < Formula
     libexec.install "draai.pyz"
     (bin/"draai").write <<~SH
       #!/bin/sh
-      exec "#{Formula["python@3.14"].opt_bin}/python3.14" "#{opt_libexec}/draai.pyz" "$@"
+      exec "#{formula_opt_bin("python@3.14")}/python3.14" "#{opt_libexec}/draai.pyz" "$@"
     SH
     chmod 0755, bin/"draai"
   end
