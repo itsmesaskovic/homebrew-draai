@@ -55,9 +55,14 @@ jobs:
           mkdir -p "$RUNNER_TEMP/bottle" && cd "$RUNNER_TEMP/bottle"
           brew install --build-bottle itsmesaskovic/draai/draai
           brew bottle --json --root-url "https://github.com/itsmesaskovic/homebrew-draai/releases/download/draai-$VER" itsmesaskovic/draai/draai
-          local_name=$(jq -r '.[].bottle.tags[].local_filename' ./*.bottle.json)
-          remote_name=$(jq -r '.[].bottle.tags[].filename' ./*.bottle.json)
-          jq -r '.[].bottle.tags | keys[]' ./*.bottle.json
+          # brew only says "all" when it can compare builds from several
+          # platforms; the contents are platform-independent, so retag it
+          set -- ./*.bottle.json; json=$1
+          tag=$(jq -r '.[].bottle.tags | keys[0]' "$json")
+          local_name=$(jq -r '.[].bottle.tags[].local_filename' "$json")
+          jq --arg t "$tag" 'map_values(.bottle.tags |= {all: (.[$t] | .filename |= sub($t; "all") | .local_filename |= sub($t; "all"))})' "$json" > all.json
+          rm "$json" && mv all.json "${json/$tag/all}"
+          remote_name=$(jq -r '.[].bottle.tags.all.filename' ./*.bottle.json)
           mv "$local_name" "$remote_name"
           echo "BOTTLE=$RUNNER_TEMP/bottle/$remote_name" >> "$GITHUB_ENV"
       - name: Publish the bottle
@@ -75,7 +80,9 @@ jobs:
           brew style itsmesaskovic/draai
           brew uninstall --force draai
           brew install itsmesaskovic/draai/draai 2>&1 | tee "$RUNNER_TEMP/install.log"
-          grep -q "Pouring draai--$VER" "$RUNNER_TEMP/install.log"
+          grep -q "Pouring draai-$VER.all.bottle" "$RUNNER_TEMP/install.log"
+          brew test itsmesaskovic/draai/draai
+          draai --version
       - name: Commit the bottle block
         if: steps.check.outputs.skip != 'true'
         run: |
