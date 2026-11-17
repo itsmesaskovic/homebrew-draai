@@ -21,5 +21,65 @@ jobs:
       - name: Service starts and serves the control panel
         run: |
           brew services start draai
-          for _ in $(seq 1 20); do curl -fsS http://localhost:8765/api/state && break; sleep 1; done | grep '"version"'
+          for _ in $(seq 1 20); do curl -fsS http://localhost:8765/api/state && break; sleep 1; done | grep '"install": "homebrew"'
           brew services stop draai
+
+  bottle:
+    # One "all" bottle (DRAAI is pure Python), so installs never need
+    # current Xcode or Command Line Tools. Runs once per new version: the
+    # draai release Action drops the old bottle block when it bumps the formula.
+    needs: formula
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Already bottled?
+        id: check
+        run: |
+          if grep -q '^  bottle do$' Formula/draai.rb; then echo "skip=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Tap this checkout
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          mkdir -p "$(brew --repository)/Library/Taps/itsmesaskovic"
+          ln -s "$GITHUB_WORKSPACE" "$(brew --repository)/Library/Taps/itsmesaskovic/homebrew-draai"
+          brew trust --formula itsmesaskovic/draai/draai
+      - name: Build the bottle
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          VER=$(brew info --json=v2 itsmesaskovic/draai/draai | jq -r '.formulae[0].versions.stable')
+          echo "VER=$VER" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/bottle" && cd "$RUNNER_TEMP/bottle"
+          brew install --build-bottle itsmesaskovic/draai/draai
+          brew bottle --json --root-url "https://github.com/itsmesaskovic/homebrew-draai/releases/download/draai-$VER" itsmesaskovic/draai/draai
+          local_name=$(jq -r '.[].bottle.tags[].local_filename' ./*.bottle.json)
+          remote_name=$(jq -r '.[].bottle.tags[].filename' ./*.bottle.json)
+          jq -r '.[].bottle.tags | keys[]' ./*.bottle.json
+          mv "$local_name" "$remote_name"
+          echo "BOTTLE=$RUNNER_TEMP/bottle/$remote_name" >> "$GITHUB_ENV"
+      - name: Publish the bottle
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          if gh release view "draai-$VER" >/dev/null 2>&1; then
+            gh release upload "draai-$VER" "$BOTTLE" --clobber
+          else
+            gh release create "draai-$VER" "$BOTTLE" --title "draai $VER bottle" --notes "Homebrew bottle for DRAAI $VER."
+          fi
+      - name: Write the bottle block and check a fresh install pours it
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          brew bottle --merge --write --no-commit "$RUNNER_TEMP"/bottle/*.bottle.json
+          brew style itsmesaskovic/draai
+          brew uninstall --force draai
+          brew install itsmesaskovic/draai/draai 2>&1 | tee "$RUNNER_TEMP/install.log"
+          grep -q "Pouring draai--$VER" "$RUNNER_TEMP/install.log"
+      - name: Commit the bottle block
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -qam "draai $VER: bottle"
+          git push -q origin HEAD
