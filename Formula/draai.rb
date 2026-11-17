@@ -29,7 +29,7 @@ class Draai < Formula
         brew services start draai
       Then open it:
         draai
-      In Chrome, choose Cast, save and share > Install page as app
+      Then click "Install DRAAI" in Chrome's address bar
       (Safari: File > Add to Dock) to keep DRAAI in your Dock.
 
       Update with:
