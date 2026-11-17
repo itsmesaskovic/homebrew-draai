@@ -12,7 +12,6 @@ class Draai < Formula
 
   depends_on "python@3.14"
   depends_on "ffmpeg" => :recommended
-  depends_on "yt-dlp" => :optional
 
   def install
     libexec.install "draai.pyz"
@@ -31,6 +30,9 @@ class Draai < Formula
         draai
       Then click "Install DRAAI" in Chrome's address bar
       (Safari: File > Add to Dock) to keep DRAAI in your Dock.
+
+      Importing from a link uses yt-dlp. DRAAI explains it and offers to
+      install it in the sidebar, or run:  brew install yt-dlp
 
       Update with:
         brew upgrade draai
