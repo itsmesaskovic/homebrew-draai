@@ -1,14 +1,9 @@
 class Draai < Formula
   desc "Play your local music on Sonos, IKEA Symfonisk and Chromecast speakers"
   homepage "https://github.com/itsmesaskovic/draai"
-  url "https://github.com/itsmesaskovic/draai/releases/download/v2.8.2/draai.pyz"
-  sha256 "60fe0454468c30188bb94126fd2273060cb96cfabc225ccb5e752b5ddd65c122"
+  url "https://github.com/itsmesaskovic/draai/releases/download/v2.8.3/draai.pyz"
+  sha256 "00171d5d16c6a2ca1d5d8bd8a8f89b9fd40327e96bf899b7381de61bcc4fd97a"
   license "MIT"
-
-  bottle do
-    root_url "https://github.com/itsmesaskovic/homebrew-draai/releases/download/draai-2.8.2"
-    sha256 cellar: :any_skip_relocation, all: "446af14cead0a36d31b8c2793515daf1f0a3709c831632300a38b73df2396f8c"
-  end
 
   depends_on "python@3.14"
   depends_on "ffmpeg" => :recommended
