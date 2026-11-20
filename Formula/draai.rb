@@ -5,6 +5,11 @@ class Draai < Formula
   sha256 "febaa8d2d89ec3b45306b41cbde7823e0a2cbdb9200975a30d49fca1521743c9"
   license "MIT"
 
+  bottle do
+    root_url "https://github.com/itsmesaskovic/homebrew-draai/releases/download/draai-2.9.0"
+    sha256 cellar: :any_skip_relocation, all: "1d0fe361c1482cc9b8ad9c74c67c44b5b20d9c99a49b0ea0cc358ecc600893ca"
+  end
+
   depends_on "python@3.14"
   depends_on "ffmpeg" => :recommended
 
